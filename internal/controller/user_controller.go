@@ -9,11 +9,15 @@ import (
 )
 
 type UserController struct {
+	router  *gin.Engine
 	service *service.UserService
 }
 
 func NewUserController(service *service.UserService) *UserController {
-	return &UserController{service: service}
+	return &UserController{
+		router:  gin.Default(),
+		service: service,
+	}
 }
 
 func (ctrl *UserController) Create(c *gin.Context) {

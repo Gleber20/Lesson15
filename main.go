@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Lesson15/internal/config"
 	"Lesson15/internal/controller"
 	"Lesson15/internal/repository"
 	"Lesson15/internal/service"
@@ -11,8 +12,8 @@ import (
 )
 
 func main() {
-	dsn := "host=localhost port=5432 user=postgres password=Simuve39 dbname=onlineshop sslmode=disable"
-	db, err := sqlx.Open("postgres", dsn)
+	cfg := config.LoadConfig()
+	db, err := sqlx.Open("postgres", cfg.DSN())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,7 +22,7 @@ func main() {
 	svc := service.NewUserService(repo)
 	ctrl := controller.NewUserController(svc)
 
-	if err = ctrl.RunServer(":8080"); err != nil {
+	if err = ctrl.RunServer(":" + cfg.ServerPort); err != nil {
 		log.Fatal(err)
 	}
 

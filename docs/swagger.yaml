@@ -1,0 +1,159 @@
+definitions:
+  controller.CommonError:
+    properties:
+      error:
+        type: string
+    type: object
+  controller.CommonResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  models.User:
+    properties:
+      age:
+        type: integer
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /users:
+    post:
+      description: Функция добавления нового пользователя
+      parameters:
+      - description: Информация о новом пользователе
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controller.CommonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Добавление нового пользователя
+      tags:
+      - Users
+  /users/{id}:
+    delete:
+      description: Удаление пользователя по ID
+      parameters:
+      - description: id пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CommonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Удалить пользователя по ID
+      tags:
+      - Users
+    get:
+      description: Получение конкретного пользователя по его ID
+      parameters:
+      - description: id пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Получить пользователя по ID
+      tags:
+      - Users
+    put:
+      description: Обновление пользователя с соответствующим ID
+      parameters:
+      - description: id пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Информация о пользователе
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CommonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Обновить пользователя по ID
+      tags:
+      - Users
+swagger: "2.0"

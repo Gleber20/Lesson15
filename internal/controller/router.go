@@ -1,9 +1,16 @@
 package controller
 
+import (
+	_ "Lesson15/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+)
+
 func (ctrl *UserController) RegisterEndPoints() {
 
 	ctrl.router.POST("/users", ctrl.Create)
 	ctrl.router.GET("/users/:id", ctrl.Get)
+	ctrl.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	ctrl.router.PUT("/users/:id", ctrl.Update)
 	ctrl.router.DELETE("/users/:id", ctrl.Delete)
 

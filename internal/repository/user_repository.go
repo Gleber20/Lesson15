@@ -51,9 +51,16 @@ func (r *UserRepository) UpdateUser(user models.User) error {
 }
 
 func (r *UserRepository) DeleteUser(id int) error {
-	_, err := r.db.Exec("DELETE FROM users WHERE id = $1", id)
+	res, err := r.db.Exec("DELETE FROM users WHERE id = $1", id)
 	if err != nil {
 		return r.translateError(err)
+	}
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return r.translateError(err)
+	}
+	if rows == 0 {
+		return errs.ErrNotfound
 	}
 	return nil
 }

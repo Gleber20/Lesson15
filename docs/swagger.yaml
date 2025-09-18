@@ -21,7 +21,11 @@ definitions:
         type: string
     type: object
 info:
-  contact: {}
+  contact:
+    email: test@test.com
+    name: OnlineShop API Service
+    url: http://test.com
+  title: OnlineShop API
 paths:
   /users:
     post:

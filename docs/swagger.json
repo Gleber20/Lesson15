@@ -1,7 +1,12 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "title": "OnlineShop API",
+        "contact": {
+            "name": "OnlineShop API Service",
+            "url": "http://test.com",
+            "email": "test@test.com"
+        }
     },
     "paths": {
         "/users": {

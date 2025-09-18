@@ -11,6 +11,10 @@ import (
 	"log"
 )
 
+// @title OnlineShop API
+// @contact.name OnlineShop API Service
+// @contact.url http://test.com
+// @contact.email test@test.com
 func main() {
 	cfg := config.LoadConfig()
 	db, err := sqlx.Open("postgres", cfg.DSN())

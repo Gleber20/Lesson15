@@ -1,9 +1,9 @@
 package controller
 
 import (
+	"Lesson15/internal/contracts"
 	"Lesson15/internal/errs"
 	"Lesson15/internal/models"
-	"Lesson15/internal/service"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -12,10 +12,10 @@ import (
 
 type UserController struct {
 	router  *gin.Engine
-	service *service.UserService
+	service contracts.ServiceI
 }
 
-func NewUserController(service *service.UserService) *UserController {
+func NewUserController(service contracts.ServiceI) *UserController {
 	return &UserController{
 		router:  gin.Default(),
 		service: service,

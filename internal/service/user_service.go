@@ -1,17 +1,17 @@
 package service
 
 import (
+	"Lesson15/internal/contracts"
 	"Lesson15/internal/errs"
 	"Lesson15/internal/models"
-	"Lesson15/internal/repository"
 	"errors"
 )
 
 type UserService struct {
-	repo *repository.UserRepository
+	repo contracts.RepositoryI
 }
 
-func NewUserService(repo *repository.UserRepository) *UserService {
+func NewUserService(repo contracts.RepositoryI) *UserService {
 	return &UserService{repo: repo}
 }
 

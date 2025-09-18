@@ -13,15 +13,15 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
 
-func (s *UserService) CreateUser(user *models.User) error {
+func (s *UserService) CreateUser(user models.User) error {
 	return s.repo.CreateUser(user)
 }
 
-func (s *UserService) UpdateUser(user *models.User) error {
+func (s *UserService) UpdateUser(user models.User) error {
 	return s.repo.UpdateUser(user)
 }
 
-func (s *UserService) GetUserById(userId int) (*models.User, error) {
+func (s *UserService) GetUserById(userId int) (models.User, error) {
 	return s.repo.GetUserById(userId)
 }
 

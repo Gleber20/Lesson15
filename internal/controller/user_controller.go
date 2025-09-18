@@ -58,7 +58,7 @@ func (ctrl *UserController) Create(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.service.CreateUser(&user); err != nil {
+	if err := ctrl.service.CreateUser(user); err != nil {
 		ctrl.handleError(c, err)
 		return
 	}
@@ -148,10 +148,17 @@ func (ctrl *UserController) Update(c *gin.Context) {
 // @Failure 500 {object} CommonError
 // @Router /users/{id} [delete]
 func (ctrl *UserController) Delete(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	if err := ctrl.service.DeleteUser(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		ctrl.handleError(c, errs.ErrInvalidUserID)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully!"})
+
+	if err = ctrl.service.DeleteUser(id); err != nil {
+		ctrl.handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, CommonResponse{Message: "User deleted successfully!"})
 }

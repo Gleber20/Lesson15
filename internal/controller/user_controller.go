@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"Lesson15/internal/errs"
 	"Lesson15/internal/models"
 	"Lesson15/internal/service"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -17,6 +19,19 @@ func NewUserController(service *service.UserService) *UserController {
 	return &UserController{
 		router:  gin.Default(),
 		service: service,
+	}
+}
+
+func (ctrl *UserController) handleError(c *gin.Context, err error) {
+	switch {
+	case errors.Is(err, errs.ErrUserNotfound) || errors.Is(err, errs.ErrNotfound):
+		c.JSON(http.StatusNotFound, CommonError{Error: err.Error()})
+	case errors.Is(err, errs.ErrInvalidUserID) || errors.Is(err, errs.ErrInvalidRequestBody):
+		c.JSON(http.StatusBadRequest, CommonError{Error: err.Error()})
+	case errors.Is(err, errs.ErrInvalidFieldValue):
+		c.JSON(http.StatusUnprocessableEntity, CommonError{Error: err.Error()})
+	default:
+		c.JSON(http.StatusInternalServerError, CommonError{Error: err.Error()})
 	}
 }
 
@@ -35,14 +50,19 @@ func NewUserController(service *service.UserService) *UserController {
 func (ctrl *UserController) Create(c *gin.Context) {
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctrl.handleError(c, errors.Join(errs.ErrInvalidFieldValue, err))
 		return
 	}
+	if user.Name == "" || user.Email == "" || user.Age < 0 {
+		ctrl.handleError(c, errs.ErrInvalidFieldValue)
+		return
+	}
+
 	if err := ctrl.service.CreateUser(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		ctrl.handleError(c, err)
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully!"})
+	c.JSON(http.StatusCreated, CommonResponse{Message: "User created successfully!"})
 }
 
 // GetUserByID
@@ -57,12 +77,19 @@ func (ctrl *UserController) Create(c *gin.Context) {
 // @Failure 500 {object} CommonError
 // @Router /users/{id} [get]
 func (ctrl *UserController) Get(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
-	user, err := ctrl.service.GetUserById(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found!"})
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		ctrl.handleError(c, errs.ErrInvalidUserID)
 		return
 	}
+
+	user, err := ctrl.service.GetUserById(id)
+	if err != nil {
+		ctrl.handleError(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": user})
 }
 
@@ -81,18 +108,32 @@ func (ctrl *UserController) Get(c *gin.Context) {
 // @Failure 500 {object} CommonError
 // @Router /users/{id} [put]
 func (ctrl *UserController) Update(c *gin.Context) {
-	id, _ := strconv.Atoi(c.Param("id"))
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 1 {
+		ctrl.handleError(c, errs.ErrInvalidUserID)
+		return
+	}
+
 	var user models.User
-	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err = c.ShouldBindJSON(&user); err != nil {
+		ctrl.handleError(c, errors.Join(errs.ErrInvalidRequestBody, err))
 		return
 	}
+
+	if user.Name == "" || user.Email == "" || user.Age < 0 {
+		ctrl.handleError(c, errs.ErrInvalidFieldValue)
+		return
+	}
+
 	user.ID = id
-	if err := ctrl.service.UpdateUser(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+
+	if err = ctrl.service.UpdateUser(user); err != nil {
+		ctrl.handleError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully!"})
+
+	c.JSON(http.StatusOK, CommonResponse{Message: "Product updated successfully"})
 }
 
 // DeleteUserByID

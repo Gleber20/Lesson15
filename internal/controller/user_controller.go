@@ -133,7 +133,7 @@ func (ctrl *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, CommonResponse{Message: "Product updated successfully"})
+	c.JSON(http.StatusOK, CommonResponse{Message: "User updated successfully"})
 }
 
 // DeleteUserByID

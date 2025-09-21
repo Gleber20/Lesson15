@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"github.com/redis/go-redis/v9"
+	_ "github.com/redis/go-redis/v9"
 )
 
 type UserRepository struct {

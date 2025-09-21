@@ -23,7 +23,9 @@ func (c *Cache) Set(ctx context.Context, key string, value interface{}, duration
 		return err
 	}
 
-	if err = c.rdb.Set(ctx, key, rawU, duration).Err(); err != nil {
+	cacheKey := formatKey(key)
+
+	if err = c.rdb.Set(ctx, cacheKey, rawU, duration).Err(); err != nil {
 		fmt.Println("error during set:", err)
 		return err
 	}
@@ -32,7 +34,9 @@ func (c *Cache) Set(ctx context.Context, key string, value interface{}, duration
 }
 
 func (c *Cache) Get(ctx context.Context, key string, response interface{}) error {
-	val, err := c.rdb.Get(ctx, key).Result()
+	cacheKey := formatKey(key)
+
+	val, err := c.rdb.Get(ctx, cacheKey).Result()
 	if err != nil {
 		fmt.Println("error during get:", err)
 		return err
@@ -44,4 +48,9 @@ func (c *Cache) Get(ctx context.Context, key string, response interface{}) error
 	}
 
 	return nil
+}
+
+func formatKey(key string) string {
+	prefix := "onlineshop"
+	return fmt.Sprintf("%s:%s", prefix, key)
 }

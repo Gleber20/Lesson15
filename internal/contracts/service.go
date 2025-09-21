@@ -5,6 +5,8 @@ import (
 	"context"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type ServiceI interface {
 	CreateUser(ctx context.Context, user models.User) error
 	GetUserById(ctx context.Context, userId int) (models.User, error)

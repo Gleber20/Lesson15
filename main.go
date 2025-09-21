@@ -5,9 +5,11 @@ import (
 	"Lesson15/internal/controller"
 	"Lesson15/internal/repository"
 	"Lesson15/internal/service"
+	"context"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 	"log"
 )
 
@@ -22,8 +24,20 @@ func main() {
 		log.Fatal(err)
 	}
 
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     cfg.RedisAddr(),
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		log.Fatal("Ошибка подключения к Redis:", err)
+	}
+
+	cache := repository.NewCache(rdb)
+
 	repo := repository.NewUserRepository(db)
-	svc := service.NewUserService(repo)
+	svc := service.NewUserService(repo, cache)
 	ctrl := controller.NewUserController(svc)
 
 	if err = ctrl.RunServer(":" + cfg.ServerPort); err != nil {

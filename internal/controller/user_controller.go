@@ -58,7 +58,7 @@ func (ctrl *UserController) Create(c *gin.Context) {
 		return
 	}
 
-	if err := ctrl.service.CreateUser(user); err != nil {
+	if err := ctrl.service.CreateUser(c, user); err != nil {
 		ctrl.handleError(c, err)
 		return
 	}
@@ -84,7 +84,7 @@ func (ctrl *UserController) Get(c *gin.Context) {
 		return
 	}
 
-	user, err := ctrl.service.GetUserById(id)
+	user, err := ctrl.service.GetUserById(c, id)
 	if err != nil {
 		ctrl.handleError(c, err)
 		return
@@ -128,7 +128,7 @@ func (ctrl *UserController) Update(c *gin.Context) {
 
 	user.ID = id
 
-	if err = ctrl.service.UpdateUser(user); err != nil {
+	if err = ctrl.service.UpdateUser(c, user); err != nil {
 		ctrl.handleError(c, err)
 		return
 	}
@@ -155,7 +155,7 @@ func (ctrl *UserController) Delete(c *gin.Context) {
 		return
 	}
 
-	if err = ctrl.service.DeleteUser(id); err != nil {
+	if err = ctrl.service.DeleteUser(c, id); err != nil {
 		ctrl.handleError(c, err)
 		return
 	}

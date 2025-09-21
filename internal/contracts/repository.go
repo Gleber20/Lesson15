@@ -1,10 +1,13 @@
 package contracts
 
-import "Lesson15/internal/models"
+import (
+	"Lesson15/internal/models"
+	"context"
+)
 
 type RepositoryI interface {
-	CreateUser(user models.User) error
-	GetUserById(id int) (models.User, error)
-	UpdateUser(user models.User) error
-	DeleteUser(id int) error
+	CreateUser(ctx context.Context, user models.User) error
+	GetUserById(ctx context.Context, id int) (models.User, error)
+	UpdateUser(ctx context.Context, user models.User) error
+	DeleteUser(ctx context.Context, id int) error
 }

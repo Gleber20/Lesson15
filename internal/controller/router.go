@@ -8,12 +8,18 @@ import (
 
 func (ctrl *EmployeeController) RegisterEndPoints() {
 
+	ctrl.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	authG := ctrl.router.Group("/auth")
+	{
+		authG.POST("/sign-up", ctrl.SignUp)
+		authG.POST("/sign-in", ctrl.SignIn)
+	}
+
 	ctrl.router.POST("/employees", ctrl.Create)
 	ctrl.router.GET("/employees/:id", ctrl.Get)
-	ctrl.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	ctrl.router.PUT("/employees/:id", ctrl.Update)
 	ctrl.router.DELETE("/employees/:id", ctrl.Delete)
-
 }
 func (ctrl *EmployeeController) RunServer(addr string) error {
 	ctrl.RegisterEndPoints()

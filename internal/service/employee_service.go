@@ -55,7 +55,7 @@ func (s *EmployeeService) GetEmployeeByID(ctx context.Context, userId int) (mode
 	user, err = s.repo.GetEmployeeByID(ctx, userId)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotfound) {
-			return models.Employee{}, errs.ErrUserNotfound
+			return models.Employee{}, errs.ErrUserNotFound
 		}
 		return models.Employee{}, err
 	}
@@ -72,7 +72,7 @@ func (s *EmployeeService) UpdateEmployee(ctx context.Context, user models.Employ
 	_, err := s.repo.GetEmployeeByID(ctx, user.ID)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotfound) {
-			return errs.ErrUserNotfound
+			return errs.ErrUserNotFound
 		}
 		return err
 	}
@@ -83,7 +83,7 @@ func (s *EmployeeService) DeleteEmployee(ctx context.Context, userId int) error 
 	_, err := s.repo.GetEmployeeByID(ctx, userId)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotfound) {
-			return errs.ErrUserNotfound
+			return errs.ErrUserNotFound
 		}
 		return err
 	}

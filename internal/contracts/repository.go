@@ -10,4 +10,8 @@ type RepositoryI interface {
 	GetEmployeeByID(ctx context.Context, id int) (models.Employee, error)
 	UpdateEmployee(ctx context.Context, user models.Employee) error
 	DeleteEmployee(ctx context.Context, id int) error
+
+	CreateUser(ctx context.Context, user models.User) (err error)
+	GetUserByID(ctx context.Context, id int) (user models.User, err error)
+	GetUserByUsername(ctx context.Context, username string) (user models.User, err error)
 }

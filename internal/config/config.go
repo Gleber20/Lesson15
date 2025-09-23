@@ -13,6 +13,7 @@ type Config struct {
 	ServerPort string
 	DB         DBConfig
 	Redis      RedisConfig
+	AuthConfig AuthConfig
 }
 
 type DBConfig struct {
@@ -31,12 +32,18 @@ type RedisConfig struct {
 	DB       int
 }
 
+type AuthConfig struct {
+	TTLMinutes int
+	JWTSecret  string
+}
+
 func LoadConfig() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("⚠️ .env не найден, используем переменные окружения")
 	}
 
 	redisDB, _ := strconv.Atoi(getEnv("REDIS_DB", "0"))
+	ttl, _ := strconv.Atoi(getEnv("TTL_MINUTES", "15"))
 
 	return &Config{
 		ServerPort: getEnv("SERVER_PORT", "8080"),
@@ -53,6 +60,10 @@ func LoadConfig() *Config {
 			Port:     getEnv("REDIS_PORT", "6379"),
 			Password: getEnv("REDIS_PASSWORD", ""),
 			DB:       redisDB,
+		},
+		AuthConfig: AuthConfig{
+			TTLMinutes: ttl,
+			JWTSecret:  getEnv("JWT_SECRET", ""),
 		},
 	}
 }

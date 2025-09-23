@@ -8,6 +8,9 @@ import (
 	"errors"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
+	_ "github.com/rs/zerolog/log"
+	"os"
 )
 
 type EmployeeRepository struct {
@@ -30,40 +33,54 @@ func (r *EmployeeRepository) translateError(err error) error {
 }
 
 func (r *EmployeeRepository) CreateEmployee(ctx context.Context, employee models.Employee) error {
-	return r.db.QueryRowContext(ctx, `INSERT INTO employees (name, email, age) VALUES ($1, $2, $3) RETURNING id`,
-		employee.Name, employee.Email, employee.Age).Scan(&employee.ID)
+	logger := zerolog.New(os.Stdout).With().Timestamp().Str("func_name", "CreateEmployee").Logger()
+	_, err := r.db.ExecContext(ctx, `INSERT INTO employees (name, email, age) VALUES ($1, $2, $3) RETURNING id`,
+		employee.Name, employee.Email, employee.Age)
+	if err != nil {
+		logger.Err(err).Msg("Error inserting employee")
+		return r.translateError(err)
+	}
+	return nil
 }
 
 func (r *EmployeeRepository) GetEmployeeByID(ctx context.Context, id int) (models.Employee, error) {
 	var user models.Employee
+	logger := zerolog.New(os.Stdout).With().Timestamp().Str("func_name", "GetEmployeeByID").Logger()
 	err := r.db.GetContext(ctx, &user, "SELECT * FROM employees WHERE id = $1", id)
 	if err != nil {
+		logger.Err(err).Msg("Error selecting employee")
 		return models.Employee{}, r.translateError(err)
 	}
 	return user, nil
 }
 
 func (r *EmployeeRepository) UpdateEmployee(ctx context.Context, employee models.Employee) error {
+	logger := zerolog.New(os.Stdout).With().Timestamp().Str("func_name", "UpdateEmployee").Logger()
 	_, err := r.db.ExecContext(
 		ctx, `UPDATE employees SET name=$1, email=$2, age=$3 WHERE id=$4`,
 		employee.Name, employee.Email, employee.Age, employee.ID,
 	)
 	if err != nil {
+		logger.Err(err).Msg("Error updating employee")
 		return r.translateError(err)
 	}
 	return nil
 }
 
 func (r *EmployeeRepository) DeleteEmployee(ctx context.Context, id int) error {
+	logger := zerolog.New(os.Stdout).With().Timestamp().Str("func_name", "DeleteEmployee").Logger()
 	res, err := r.db.ExecContext(ctx, "DELETE FROM employees WHERE id = $1", id)
 	if err != nil {
+		logger.Err(err).Msg("Error deleting employee")
 		return r.translateError(err)
 	}
 	rows, err := res.RowsAffected()
 	if err != nil {
+		logger.Err(err).Msg("Error deleting employee")
 		return r.translateError(err)
 	}
 	if rows == 0 {
+		logger.Err(err).Msg("Error deleting employee")
 		return errs.ErrNotfound
 	}
 	return nil

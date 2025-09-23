@@ -12,4 +12,7 @@ type ServiceI interface {
 	GetEmployeeByID(ctx context.Context, userId int) (models.Employee, error)
 	UpdateEmployee(ctx context.Context, user models.Employee) error
 	DeleteEmployee(ctx context.Context, userId int) error
+
+	CreateUser(ctx context.Context, user models.User) (err error)
+	Authenticate(ctx context.Context, user models.User) (string, error)
 }

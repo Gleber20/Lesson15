@@ -43,9 +43,9 @@ func LoadConfig() *Config {
 		DB: DBConfig{
 			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnv("DB_PORT", "5432"),
-			User:     getEnv("DB_USER", "postgres"),
-			Password: getEnv("DB_PASSWORD", "Simuve39"),
-			Name:     getEnv("DB_NAME", "onlineshop"),
+			User:     getEnv("DB_USER", ""),
+			Password: getEnv("DB_PASSWORD", ""),
+			Name:     getEnv("DB_NAME", ""),
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		Redis: RedisConfig{

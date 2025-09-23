@@ -13,13 +13,13 @@ import (
 	"time"
 )
 
-type UserService struct {
+type EmployeeService struct {
 	repo  contracts.RepositoryI
 	cache contracts.CacheI
 }
 
-func NewUserService(repo contracts.RepositoryI, cache *repository.Cache) *UserService {
-	return &UserService{
+func NewUserService(repo contracts.RepositoryI, cache *repository.Cache) *EmployeeService {
+	return &EmployeeService{
 		repo:  repo,
 		cache: cache,
 	}
@@ -29,16 +29,16 @@ var (
 	defaultTTL = time.Minute * 5
 )
 
-func (s *UserService) CreateUser(ctx context.Context, user models.User) error {
-	err := s.repo.CreateUser(ctx, user)
+func (s *EmployeeService) CreateEmployee(ctx context.Context, user models.Employee) error {
+	err := s.repo.CreateEmployee(ctx, user)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *UserService) GetUserById(ctx context.Context, userId int) (models.User, error) {
-	var user models.User
+func (s *EmployeeService) GetEmployeeByID(ctx context.Context, userId int) (models.Employee, error) {
+	var user models.Employee
 
 	// 1. Тут берем из кеша данные
 	cacheKey := fmt.Sprintf("user_%d", userId)
@@ -48,16 +48,16 @@ func (s *UserService) GetUserById(ctx context.Context, userId int) (models.User,
 	}
 	// Если ошибка не связана с отсутствием ключа — возвращаем её
 	if !errors.Is(err, redis.Nil) {
-		return models.User{}, err
+		return models.Employee{}, err
 	}
 
 	// 2. Если в кэше нет, обращаемся в репозиторий, да
-	user, err = s.repo.GetUserById(ctx, userId)
+	user, err = s.repo.GetEmployeeByID(ctx, userId)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotfound) {
-			return models.User{}, errs.ErrUserNotfound
+			return models.Employee{}, errs.ErrUserNotfound
 		}
-		return models.User{}, err
+		return models.Employee{}, err
 	}
 
 	// 3. Сохраняем в кэш на 5 минут
@@ -68,8 +68,8 @@ func (s *UserService) GetUserById(ctx context.Context, userId int) (models.User,
 	return user, nil
 }
 
-func (s *UserService) UpdateUser(ctx context.Context, user models.User) error {
-	_, err := s.repo.GetUserById(ctx, user.ID)
+func (s *EmployeeService) UpdateEmployee(ctx context.Context, user models.Employee) error {
+	_, err := s.repo.GetEmployeeByID(ctx, user.ID)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotfound) {
 			return errs.ErrUserNotfound
@@ -79,15 +79,15 @@ func (s *UserService) UpdateUser(ctx context.Context, user models.User) error {
 	return nil
 }
 
-func (s *UserService) DeleteUser(ctx context.Context, userId int) error {
-	_, err := s.repo.GetUserById(ctx, userId)
+func (s *EmployeeService) DeleteEmployee(ctx context.Context, userId int) error {
+	_, err := s.repo.GetEmployeeByID(ctx, userId)
 	if err != nil {
 		if errors.Is(err, errs.ErrNotfound) {
 			return errs.ErrUserNotfound
 		}
 		return err
 	}
-	err = s.repo.DeleteUser(ctx, userId)
+	err = s.repo.DeleteEmployee(ctx, userId)
 	if err != nil {
 		return err
 	}

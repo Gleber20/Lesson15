@@ -6,16 +6,16 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func (ctrl *UserController) RegisterEndPoints() {
+func (ctrl *EmployeeController) RegisterEndPoints() {
 
-	ctrl.router.POST("/users", ctrl.Create)
-	ctrl.router.GET("/users/:id", ctrl.Get)
+	ctrl.router.POST("/employees", ctrl.Create)
+	ctrl.router.GET("/employees/:id", ctrl.Get)
 	ctrl.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	ctrl.router.PUT("/users/:id", ctrl.Update)
-	ctrl.router.DELETE("/users/:id", ctrl.Delete)
+	ctrl.router.PUT("/employees/:id", ctrl.Update)
+	ctrl.router.DELETE("/employees/:id", ctrl.Delete)
 
 }
-func (ctrl *UserController) RunServer(addr string) error {
+func (ctrl *EmployeeController) RunServer(addr string) error {
 	ctrl.RegisterEndPoints()
 	if err := ctrl.router.Run(addr); err != nil {
 		return err

@@ -14,12 +14,12 @@ import (
 )
 
 func TestUserController_CreateUser(t *testing.T) {
-	type mockBehaviour func(s *mock_contracts.MockServiceI, u models.User)
+	type mockBehaviour func(s *mock_contracts.MockServiceI, u models.Employee)
 
 	testTable := []struct {
 		name                 string
 		inputBody            string
-		inputUser            models.User
+		inputUser            models.Employee
 		mockBehaviour        mockBehaviour
 		expectedStatusCode   int
 		expectedResponseBody string
@@ -27,25 +27,25 @@ func TestUserController_CreateUser(t *testing.T) {
 		{
 			name:      "OK",
 			inputBody: `{"name":"John","email":"john@example.com","age":25}`,
-			inputUser: models.User{Name: "John", Email: "john@example.com", Age: 25},
-			mockBehaviour: func(s *mock_contracts.MockServiceI, u models.User) {
+			inputUser: models.Employee{Name: "John", Email: "john@example.com", Age: 25},
+			mockBehaviour: func(s *mock_contracts.MockServiceI, u models.Employee) {
 				s.EXPECT().CreateUser(gomock.Any(), u).Return(nil)
 			},
 			expectedStatusCode:   http.StatusCreated,
-			expectedResponseBody: `{"message":"User created successfully!"}`,
+			expectedResponseBody: `{"message":"Employee created successfully!"}`,
 		},
 		{
 			name:                 "Empty fields",
 			inputBody:            `{}`,
-			mockBehaviour:        func(s *mock_contracts.MockServiceI, u models.User) {},
+			mockBehaviour:        func(s *mock_contracts.MockServiceI, u models.Employee) {},
 			expectedStatusCode:   http.StatusUnprocessableEntity,
 			expectedResponseBody: `{"error":"invalid field value"}`,
 		},
 		{
 			name:      "Invalid fields",
 			inputBody: `{"name":"","email":"", "age":-1}`,
-			inputUser: models.User{},
-			mockBehaviour: func(s *mock_contracts.MockServiceI, u models.User) {
+			inputUser: models.Employee{},
+			mockBehaviour: func(s *mock_contracts.MockServiceI, u models.Employee) {
 			},
 			expectedStatusCode:   http.StatusUnprocessableEntity,
 			expectedResponseBody: `{"error":"invalid field value"}`,
@@ -53,8 +53,8 @@ func TestUserController_CreateUser(t *testing.T) {
 		{
 			name:      "Service error",
 			inputBody: `{"name":"John","email":"john@example.com","age":25}`,
-			inputUser: models.User{Name: "John", Email: "john@example.com", Age: 25},
-			mockBehaviour: func(s *mock_contracts.MockServiceI, u models.User) {
+			inputUser: models.Employee{Name: "John", Email: "john@example.com", Age: 25},
+			mockBehaviour: func(s *mock_contracts.MockServiceI, u models.Employee) {
 				s.EXPECT().CreateUser(gomock.Any(), u).Return(errs.ErrInvalidFieldValue)
 			},
 			expectedStatusCode:   http.StatusUnprocessableEntity,

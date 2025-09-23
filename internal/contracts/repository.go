@@ -6,8 +6,8 @@ import (
 )
 
 type RepositoryI interface {
-	CreateUser(ctx context.Context, user models.User) error
-	GetUserById(ctx context.Context, id int) (models.User, error)
-	UpdateUser(ctx context.Context, user models.User) error
-	DeleteUser(ctx context.Context, id int) error
+	CreateEmployee(ctx context.Context, user models.Employee) error
+	GetEmployeeByID(ctx context.Context, id int) (models.Employee, error)
+	UpdateEmployee(ctx context.Context, user models.Employee) error
+	DeleteEmployee(ctx context.Context, id int) error
 }

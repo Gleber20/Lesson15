@@ -8,8 +8,8 @@ import (
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
 
 type ServiceI interface {
-	CreateUser(ctx context.Context, user models.User) error
-	GetUserById(ctx context.Context, userId int) (models.User, error)
-	UpdateUser(ctx context.Context, user models.User) error
-	DeleteUser(ctx context.Context, userId int) error
+	CreateEmployee(ctx context.Context, user models.Employee) error
+	GetEmployeeByID(ctx context.Context, userId int) (models.Employee, error)
+	UpdateEmployee(ctx context.Context, user models.Employee) error
+	DeleteEmployee(ctx context.Context, userId int) error
 }

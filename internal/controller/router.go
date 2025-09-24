@@ -16,10 +16,13 @@ func (ctrl *EmployeeController) RegisterEndPoints() {
 		authG.POST("/sign-in", ctrl.SignIn)
 	}
 
-	ctrl.router.POST("/employees", ctrl.Create)
-	ctrl.router.GET("/employees/:id", ctrl.Get)
-	ctrl.router.PUT("/employees/:id", ctrl.Update)
-	ctrl.router.DELETE("/employees/:id", ctrl.Delete)
+	apiG := ctrl.router.Group("/api", ctrl.checkUserAuthentication)
+	{
+		apiG.POST("/employees", ctrl.Create)
+		apiG.GET("/employees/:id", ctrl.Get)
+		apiG.PUT("/employees/:id", ctrl.Update)
+		apiG.DELETE("/employees/:id", ctrl.Delete)
+	}
 }
 func (ctrl *EmployeeController) RunServer(addr string) error {
 	ctrl.RegisterEndPoints()

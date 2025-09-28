@@ -9,7 +9,30 @@ definitions:
       message:
         type: string
     type: object
-  models.User:
+  controller.SignInRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  controller.SignUpRequest:
+    properties:
+      full_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  controller.TokenPairResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.Employee:
     properties:
       age:
         type: integer
@@ -27,16 +50,16 @@ info:
     url: http://test.com
   title: OnlineShop API
 paths:
-  /users:
+  /api/employees/:
     post:
-      description: Функция добавления нового пользователя
+      description: Функция добавления нового сотрудника
       parameters:
-      - description: Информация о новом пользователе
+      - description: Информация о новом сотруднике
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/models.Employee'
       produces:
       - application/json
       responses:
@@ -56,14 +79,16 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controller.CommonError'
-      summary: Добавление нового пользователя
+      security:
+      - BearerAuth: []
+      summary: Добавление нового сотрудника
       tags:
-      - Users
-  /users/{id}:
+      - Employees
+  /api/employees/{id}:
     delete:
-      description: Удаление пользователя по ID
+      description: Удаление сотрудника по ID
       parameters:
-      - description: id пользователя
+      - description: id сотрудника
         in: path
         name: id
         required: true
@@ -87,13 +112,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controller.CommonError'
-      summary: Удалить пользователя по ID
+      security:
+      - BearerAuth: []
+      summary: Удалить сотрудника по ID
       tags:
-      - Users
+      - Employees
     get:
-      description: Получение конкретного пользователя по его ID
+      description: Получение конкретного сотрудника по его ID
       parameters:
-      - description: id пользователя
+      - description: id сотрудника
         in: path
         name: id
         required: true
@@ -104,7 +131,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.User'
+            $ref: '#/definitions/models.Employee'
         "400":
           description: Bad Request
           schema:
@@ -117,23 +144,25 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controller.CommonError'
-      summary: Получить пользователя по ID
+      security:
+      - BearerAuth: []
+      summary: Получить сотрудника по ID
       tags:
-      - Users
+      - Employees
     put:
-      description: Обновление пользователя с соответствующим ID
+      description: Обновление сотрудника с соответствующим ID
       parameters:
-      - description: id пользователя
+      - description: id сотрудника
         in: path
         name: id
         required: true
         type: integer
-      - description: Информация о пользователе
+      - description: Информация о сотруднике
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/models.Employee'
       produces:
       - application/json
       responses:
@@ -157,7 +186,113 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/controller.CommonError'
-      summary: Обновить пользователя по ID
+      security:
+      - BearerAuth: []
+      summary: Обновить сотрудника по ID
       tags:
-      - Users
+      - Employees
+  /auth/refresh:
+    get:
+      description: Обновить пару токенов
+      parameters:
+      - description: вставьте refresh token
+        in: header
+        name: X-Refresh-Token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.TokenPairResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Обновить пару токенов
+      tags:
+      - Auth
+  /auth/sign-in:
+    post:
+      description: Войти в аккаунт
+      parameters:
+      - description: логин и пароль
+        in: body
+        name: request_body
+        required: true
+        schema:
+          $ref: '#/definitions/controller.SignInRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.TokenPairResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Вход
+      tags:
+      - Auth
+  /auth/sign-up:
+    post:
+      description: Создать новый аккаунт
+      parameters:
+      - description: информация о новом аккаунте
+        in: body
+        name: request_body
+        required: true
+        schema:
+          $ref: '#/definitions/controller.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/controller.CommonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/controller.CommonError'
+      summary: Регистрация
+      tags:
+      - Auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

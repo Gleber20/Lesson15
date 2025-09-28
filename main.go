@@ -18,6 +18,9 @@ import (
 // @contact.name OnlineShop API Service
 // @contact.url http://test.com
 // @contact.email test@test.com
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	logger := zerolog.New(os.Stdout).With().Timestamp().Logger()
 	logger.Info().Msg("Starting up application...")

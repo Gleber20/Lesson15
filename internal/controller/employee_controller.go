@@ -44,12 +44,13 @@ func (ctrl *EmployeeController) handleError(c *gin.Context, err error) {
 // @Tags Employees
 // @Consume json
 // @Produce json
+// @Security BearerAuth
 // @Param request body models.Employee true "Информация о новом сотруднике"
 // @Success 201 {object} CommonResponse
 // @Failure 400 {object} CommonError
 // @Failure 422 {object} CommonError
 // @Failure 500 {object} CommonError
-// @Router /employees [post]
+// @Router /api/employees/ [post]
 func (ctrl *EmployeeController) Create(c *gin.Context) {
 	var employee models.Employee
 	if err := c.BindJSON(&employee); err != nil {
@@ -73,12 +74,13 @@ func (ctrl *EmployeeController) Create(c *gin.Context) {
 // @Description Получение конкретного сотрудника по его ID
 // @Tags Employees
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "id сотрудника"
 // @Success 200 {object} models.Employee
 // @Failure 400 {object} CommonError
 // @Failure 404 {object} CommonError
 // @Failure 500 {object} CommonError
-// @Router /employees/{id} [get]
+// @Router /api/employees/{id} [get]
 func (ctrl *EmployeeController) Get(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -102,6 +104,7 @@ func (ctrl *EmployeeController) Get(c *gin.Context) {
 // @Tags Employees
 // @Consume json
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "id сотрудника"
 // @Param request body models.Employee true "Информация о сотруднике"
 // @Success 200 {object} CommonResponse
@@ -109,7 +112,7 @@ func (ctrl *EmployeeController) Get(c *gin.Context) {
 // @Failure 404 {object} CommonError
 // @Failure 422 {object} CommonError
 // @Failure 500 {object} CommonError
-// @Router /employees/{id} [put]
+// @Router /api/employees/{id} [put]
 func (ctrl *EmployeeController) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -144,12 +147,13 @@ func (ctrl *EmployeeController) Update(c *gin.Context) {
 // @Description Удаление сотрудника по ID
 // @Tags Employees
 // @Produce json
+// @Security BearerAuth
 // @Param id path int true "id сотрудника"
 // @Success 200 {object} CommonResponse
 // @Failure 400 {object} CommonError
 // @Failure 404 {object} CommonError
 // @Failure 500 {object} CommonError
-// @Router /employees{id} [delete]
+// @Router /api/employees/{id} [delete]
 func (ctrl *EmployeeController) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)

@@ -1,11 +1,9 @@
 package service
 
 import (
-	"Lesson15/internal/config"
 	"Lesson15/internal/errs"
 	"Lesson15/internal/models"
 	"Lesson15/internal/utils"
-	"Lesson15/pkg"
 	"context"
 	"errors"
 	_ "golang.org/x/tools/go/cfg"
@@ -36,44 +34,27 @@ func (s *EmployeeService) CreateUser(ctx context.Context, user models.User) (err
 	return nil
 }
 
-func (s *EmployeeService) Authenticate(ctx context.Context, user models.User) (string, string, error) {
+func (s *EmployeeService) Authenticate(ctx context.Context, user models.User) (int, error) {
 	// проверить существует ли пользователь с таким username
 	userFromDB, err := s.repo.GetUserByUsername(ctx, user.Username)
 	if err != nil {
 		if !errors.Is(err, errs.ErrNotfound) {
-			return "", "", errs.ErrUserNotFound
+			return 0, errs.ErrUserNotFound
 		}
 
-		return "", "", err
+		return 0, err
 	}
 
 	// за хэшировать пароль, который получили от пользователя
 	user.Password, err = utils.GenerateHash(user.Password)
 	if err != nil {
-		return "", "", err
+		return 0, err
 	}
 
 	// проверить правильно ли он указал пароль
 	if userFromDB.Password != user.Password {
-		return "", "", errs.ErrIncorrectUsernameOrPassword
+		return 0, errs.ErrIncorrectUsernameOrPassword
 	}
 
-	cfg := config.LoadConfig()
-	accessToken, err := pkg.GenerateToken(
-		userFromDB.ID,
-		cfg.AuthConfig.AccessTokenTTLMinutes,
-		false)
-	if err != nil {
-		return "", "", err
-	}
-
-	refreshToken, err := pkg.GenerateToken(
-		userFromDB.ID,
-		cfg.AuthConfig.RefreshTokenTTLDays,
-		true)
-	if err != nil {
-		return "", "", err
-	}
-
-	return accessToken, refreshToken, nil
+	return userFromDB.ID, nil
 }

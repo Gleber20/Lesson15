@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"Lesson15/internal/config"
 	"Lesson15/internal/errs"
 	"Lesson15/internal/models"
 	"Lesson15/pkg"
@@ -16,6 +15,19 @@ type SignUpRequest struct {
 	Password string `json:"password"`
 }
 
+// SignUp
+// @Summary Регистрация
+// @Description Создать новый аккаунт
+// @Tags Auth
+// @Consume json
+// @Produce json
+// @Param request_body body SignUpRequest true "информация о новом аккаунте"
+// @Success 201 {object} CommonResponse
+// @Failure 422 {object} CommonError
+// @Failure 400 {object} CommonError
+// @Failure 404 {object} CommonError
+// @Failure 500 {object} CommonError
+// @Router /auth/sign-up [post]
 func (ctrl *EmployeeController) SignUp(c *gin.Context) {
 	var input SignUpRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -40,11 +52,23 @@ type SignInRequest struct {
 	Password string `json:"password"`
 }
 
-type SignInResponse struct {
+type TokenPairResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 }
 
+// SignIn
+// @Summary Вход
+// @Description Войти в аккаунт
+// @Tags Auth
+// @Consume json
+// @Produce json
+// @Param request_body body SignInRequest true "логин и пароль"
+// @Success 200 {object} TokenPairResponse
+// @Failure 400 {object} CommonError
+// @Failure 404 {object} CommonError
+// @Failure 500 {object} CommonError
+// @Router /auth/sign-in [post]
 func (ctrl *EmployeeController) SignIn(c *gin.Context) {
 	var input SignInRequest
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -52,7 +76,7 @@ func (ctrl *EmployeeController) SignIn(c *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err := ctrl.service.Authenticate(c, models.User{
+	userID, err := ctrl.service.Authenticate(c, models.User{
 		Username: input.Username,
 		Password: input.Password,
 	})
@@ -61,7 +85,13 @@ func (ctrl *EmployeeController) SignIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, SignInResponse{
+	accessToken, refreshToken, err := ctrl.generateNewTokenPair(userID)
+	if err != nil {
+		ctrl.handleError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, TokenPairResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
@@ -71,6 +101,17 @@ const (
 	refreshTokenHeader = "X-Refresh-Token"
 )
 
+// RefreshTokenPair
+// @Summary Обновить пару токенов
+// @Description Обновить пару токенов
+// @Tags Auth
+// @Produce json
+// @Param X-Refresh-Token header string true "вставьте refresh token"
+// @Success 200 {object} TokenPairResponse
+// @Failure 400 {object} CommonError
+// @Failure 404 {object} CommonError
+// @Failure 500 {object} CommonError
+// @Router /auth/refresh [get]
 func (ctrl *EmployeeController) RefreshTokenPair(c *gin.Context) {
 
 	token, err := ctrl.extractTokenFromHeader(c, refreshTokenHeader)
@@ -79,7 +120,6 @@ func (ctrl *EmployeeController) RefreshTokenPair(c *gin.Context) {
 		return
 	}
 
-	cfg := config.LoadConfig()
 	userID, isRefresh, err := pkg.ParseToken(token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, CommonError{Error: err.Error()})
@@ -91,25 +131,13 @@ func (ctrl *EmployeeController) RefreshTokenPair(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := pkg.GenerateToken(
-		userID,
-		cfg.AuthConfig.AccessTokenTTLMinutes,
-		false)
+	accessToken, refreshToken, err := ctrl.generateNewTokenPair(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, CommonError{Error: errs.ErrSomethingWentWrong.Error()})
+		ctrl.handleError(c, err)
 		return
 	}
 
-	refreshToken, err := pkg.GenerateToken(
-		userID,
-		cfg.AuthConfig.RefreshTokenTTLDays,
-		true)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, CommonError{Error: errs.ErrSomethingWentWrong.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, SignInResponse{
+	c.JSON(http.StatusOK, TokenPairResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})

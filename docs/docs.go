@@ -19,24 +19,29 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/users": {
+        "/api/employees/": {
             "post": {
-                "description": "Функция добавления нового пользователя",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Функция добавления нового сотрудника",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Employees"
                 ],
-                "summary": "Добавление нового пользователя",
+                "summary": "Добавление нового сотрудника",
                 "parameters": [
                     {
-                        "description": "Информация о новом пользователе",
+                        "description": "Информация о новом сотруднике",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/models.Employee"
                         }
                     }
                 ],
@@ -68,20 +73,25 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}": {
+        "/api/employees/{id}": {
             "get": {
-                "description": "Получение конкретного пользователя по его ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Получение конкретного сотрудника по его ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Employees"
                 ],
-                "summary": "Получить пользователя по ID",
+                "summary": "Получить сотрудника по ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "id пользователя",
+                        "description": "id сотрудника",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -91,7 +101,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/models.Employee"
                         }
                     },
                     "400": {
@@ -115,29 +125,34 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Обновление пользователя с соответствующим ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Обновление сотрудника с соответствующим ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Employees"
                 ],
-                "summary": "Обновить пользователя по ID",
+                "summary": "Обновить сотрудника по ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "id пользователя",
+                        "description": "id сотрудника",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "Информация о пользователе",
+                        "description": "Информация о сотруднике",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.User"
+                            "$ref": "#/definitions/models.Employee"
                         }
                     }
                 ],
@@ -175,18 +190,23 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Удаление пользователя по ID",
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Удаление сотрудника по ID",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Employees"
                 ],
-                "summary": "Удалить пользователя по ID",
+                "summary": "Удалить сотрудника по ID",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "id пользователя",
+                        "description": "id сотрудника",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -219,6 +239,157 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/auth/refresh": {
+            "get": {
+                "description": "Обновить пару токенов",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Обновить пару токенов",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "вставьте refresh token",
+                        "name": "X-Refresh-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.TokenPairResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sign-in": {
+            "post": {
+                "description": "Войти в аккаунт",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Вход",
+                "parameters": [
+                    {
+                        "description": "логин и пароль",
+                        "name": "request_body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.SignInRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.TokenPairResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/sign-up": {
+            "post": {
+                "description": "Создать новый аккаунт",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Регистрация",
+                "parameters": [
+                    {
+                        "description": "информация о новом аккаунте",
+                        "name": "request_body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.SignUpRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CommonError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -238,7 +409,43 @@ const docTemplate = `{
                 }
             }
         },
-        "models.User": {
+        "controller.SignInRequest": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.SignUpRequest": {
+            "type": "object",
+            "properties": {
+                "full_name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.TokenPairResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Employee": {
             "type": "object",
             "properties": {
                 "age": {
@@ -254,6 +461,13 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`

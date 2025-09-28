@@ -33,8 +33,9 @@ type RedisConfig struct {
 }
 
 type AuthConfig struct {
-	TTLMinutes int
-	JWTSecret  string
+	AccessTokenTTLMinutes int
+	RefreshTokenTTLDays   int
+	JWTSecret             string
 }
 
 func LoadConfig() *Config {
@@ -62,8 +63,9 @@ func LoadConfig() *Config {
 			DB:       redisDB,
 		},
 		AuthConfig: AuthConfig{
-			TTLMinutes: ttl,
-			JWTSecret:  getEnv("JWT_SECRET", ""),
+			AccessTokenTTLMinutes: ttl,
+			RefreshTokenTTLDays:   ttl,
+			JWTSecret:             getEnv("JWT_SECRET", ""),
 		},
 	}
 }

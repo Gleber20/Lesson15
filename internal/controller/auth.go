@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"Lesson15/internal/config"
 	"Lesson15/internal/errs"
 	"Lesson15/internal/models"
+	"Lesson15/pkg"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -39,7 +41,8 @@ type SignInRequest struct {
 }
 
 type SignInResponse struct {
-	Token string `json:"token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (ctrl *EmployeeController) SignIn(c *gin.Context) {
@@ -49,7 +52,7 @@ func (ctrl *EmployeeController) SignIn(c *gin.Context) {
 		return
 	}
 
-	token, err := ctrl.service.Authenticate(c, models.User{
+	accessToken, refreshToken, err := ctrl.service.Authenticate(c, models.User{
 		Username: input.Username,
 		Password: input.Password,
 	})
@@ -59,6 +62,57 @@ func (ctrl *EmployeeController) SignIn(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, SignInResponse{
-		Token: token,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	})
+}
+
+const (
+	refreshTokenHeader = "X-Refresh-Token"
+)
+
+func (ctrl *EmployeeController) RefreshTokenPair(c *gin.Context) {
+
+	token, err := ctrl.extractTokenFromHeader(c, refreshTokenHeader)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, CommonError{Error: err.Error()})
+		return
+	}
+
+	cfg := config.LoadConfig()
+	userID, isRefresh, err := pkg.ParseToken(token, cfg.AuthConfig.JWTSecret)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, CommonError{Error: err.Error()})
+		return
+	}
+
+	if !isRefresh {
+		c.JSON(http.StatusUnauthorized, CommonError{Error: "inappropriate token"})
+		return
+	}
+
+	accessToken, err := pkg.GenerateToken(
+		userID,
+		cfg.AuthConfig.AccessTokenTTLMinutes,
+		cfg.AuthConfig.JWTSecret,
+		false)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, CommonError{Error: errs.ErrSomethingWentWrong.Error()})
+		return
+	}
+
+	refreshToken, err := pkg.GenerateToken(
+		userID,
+		cfg.AuthConfig.RefreshTokenTTLDays,
+		cfg.AuthConfig.JWTSecret,
+		true)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, CommonError{Error: errs.ErrSomethingWentWrong.Error()})
+		return
+	}
+	
+	c.JSON(http.StatusOK, SignInResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	})
 }

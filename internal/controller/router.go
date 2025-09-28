@@ -14,6 +14,7 @@ func (ctrl *EmployeeController) RegisterEndPoints() {
 	{
 		authG.POST("/sign-up", ctrl.SignUp)
 		authG.POST("/sign-in", ctrl.SignIn)
+		authG.GET("/refresh", ctrl.RefreshTokenPair)
 	}
 
 	apiG := ctrl.router.Group("/api", ctrl.checkUserAuthentication)

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"Lesson15/internal/config"
 	"Lesson15/pkg"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -20,8 +19,7 @@ func (ctrl *EmployeeController) checkUserAuthentication(c *gin.Context) {
 		return
 	}
 
-	cfg := config.LoadConfig()
-	userID, isRefresh, err := pkg.ParseToken(token, cfg.AuthConfig.JWTSecret)
+	userID, isRefresh, err := pkg.ParseToken(token)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, CommonError{Error: err.Error()})
 		return

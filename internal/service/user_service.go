@@ -62,7 +62,6 @@ func (s *EmployeeService) Authenticate(ctx context.Context, user models.User) (s
 	accessToken, err := pkg.GenerateToken(
 		userFromDB.ID,
 		cfg.AuthConfig.AccessTokenTTLMinutes,
-		cfg.AuthConfig.JWTSecret,
 		false)
 	if err != nil {
 		return "", "", err
@@ -71,7 +70,6 @@ func (s *EmployeeService) Authenticate(ctx context.Context, user models.User) (s
 	refreshToken, err := pkg.GenerateToken(
 		userFromDB.ID,
 		cfg.AuthConfig.RefreshTokenTTLDays,
-		cfg.AuthConfig.JWTSecret,
 		true)
 	if err != nil {
 		return "", "", err

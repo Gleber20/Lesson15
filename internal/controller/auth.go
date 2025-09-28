@@ -80,7 +80,7 @@ func (ctrl *EmployeeController) RefreshTokenPair(c *gin.Context) {
 	}
 
 	cfg := config.LoadConfig()
-	userID, isRefresh, err := pkg.ParseToken(token, cfg.AuthConfig.JWTSecret)
+	userID, isRefresh, err := pkg.ParseToken(token)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, CommonError{Error: err.Error()})
 		return
@@ -94,7 +94,6 @@ func (ctrl *EmployeeController) RefreshTokenPair(c *gin.Context) {
 	accessToken, err := pkg.GenerateToken(
 		userID,
 		cfg.AuthConfig.AccessTokenTTLMinutes,
-		cfg.AuthConfig.JWTSecret,
 		false)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, CommonError{Error: errs.ErrSomethingWentWrong.Error()})
@@ -104,13 +103,12 @@ func (ctrl *EmployeeController) RefreshTokenPair(c *gin.Context) {
 	refreshToken, err := pkg.GenerateToken(
 		userID,
 		cfg.AuthConfig.RefreshTokenTTLDays,
-		cfg.AuthConfig.JWTSecret,
 		true)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, CommonError{Error: errs.ErrSomethingWentWrong.Error()})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, SignInResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
